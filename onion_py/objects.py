@@ -18,6 +18,9 @@ class RelaySummary:
     self.addresses = document.get('a')
     self.running = document.get('r')
 
+  def __str__(self):
+    return "Relay summary for %s (%s) " % (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
+
 """
 Bridge summary field
 
@@ -32,6 +35,8 @@ class BridgeSummary:
     self.hash = document.get('h')
     self.running = document.get('r')
 
+  def __str__(self):
+    return "Bridge summary for %s (%s) " % (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
 
 """
 Summary document
@@ -51,6 +56,10 @@ class Summary:
     self.bridges_published = document.get('bridges_published')
     self.relays = [RelaySummary(d) for d in document.get('relays')]
     self.bridges = [BridgeSummary(d) for d in document.get('bridges')]
+
+  def __str__(self):
+    return "Summary document (%d bridges, %d relays)" % (len(self.bridges or []),len(self.relays or []))
+
 
 """
 Relay Details field
@@ -120,6 +129,9 @@ class RelayDetails:
     self.middle_probability = g('middle_probability')
     self.exit_probability = g('exit_probability')
 
+  def __str__(self):
+    return "Detailed relay descriptor for %s (%s)" % (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
+
 """
 Bridge Details field
 
@@ -151,6 +163,8 @@ class BridgeDetails:
     self.platform = g('platform')
     self.pool_assignment = g('pool_assignment')
 
+  def __str__(self):
+    return "Detailed bridge descriptor for %s (%s)" % (self.nickname or "<Not named>", self.hashed_fingerprint or "<No fingerprint>")
 
 
 """
@@ -170,6 +184,9 @@ class Details:
     self.bridges_published = document.get('bridges_published')
     self.relays = [RelayDetails(d) for d in document.get('relays')]
     self.bridge = [BridgeDetails(d) for d in document.get('bridges')]
+
+  def __str__(self):
+    return "Details document (%d bridges, %d relays)" % (len(self.bridges or []),len(self.relays or []))
 
 """
 Graph history object
@@ -193,6 +210,9 @@ class GraphHistory:
     self.values = g('values')
     #TODO: support additional statistic fields carried in history objects (countries, transports, versions)
 
+  def __str__(self):
+    return "Graph history object"
+
 """
 Bandwidth object
 
@@ -207,6 +227,9 @@ class BandwidthDetail:
     self.finger_print = g('fingerprint')
     self.write_history = dict([(k, GraphHistory(v)) for k,v in g('write_history').items()])
     self.read_history = dict([(k, GraphHistory(v)) for k,v in g('read_history').items()])
+
+  def __str__(self):
+    return "Bandwidth object"
 
 """
 Bandwidth document
@@ -226,6 +249,9 @@ class Bandwidth:
     self.bridges_published = g('bridges_published')
     self.relays = [BandwidthDetail(d) for d in g('relays')]
     self.bridges = [BandwidthDetail(d) for d in g('bridges')]
+
+  def __str__(self):
+    return "Bandwidth document (Containing bandwidth histories for %d bridges and %d relays)" % (len(self.bridges or []),len(self.relays or []))
 
 """
 Relay weight object
@@ -248,6 +274,9 @@ class RelayWeight:
     self.middle_probability = dict([(k, GraphHistory(v)) for k,v in g('middle_probability').items()])
     self.exit_probability = dict([(k, GraphHistory(v)) for k,v in g('exit_probability').items()])
 
+  def __str__(self):
+    return "relay weight object for %s" % (self.fingerprint or '<no fingerprint>')
+
 """
 Weights document
 
@@ -267,6 +296,9 @@ class Weights:
     self.relays = [RelayWeight(d) for d in g('relays')]
     self.bridges = []
 
+  def __str__(self):
+    return "Weights document containing weight history for %d relays)" % (len(self.relays or []))
+
 """
 Bridge client object
 
@@ -279,6 +311,10 @@ class BridgeClient:
     g = document.get
     self.fingerprint = g('fingerprint')
     self.average_clients = dict([(k, GraphHistory(v)) for k,v in g('average_clients').items()])
+
+  def __str__(self):
+    return "Bridge client history object for %s" % (self.fingerprint or '<no fingerprint>')
+
 
 """
 Clients document
@@ -299,6 +335,9 @@ class Clients:
     self.relays = []
     self.bridges = [BridgeClient(d) for d in g('bridges')]
 
+  def __str__(self):
+    return "Clients document containing client histories for %d bridges" % (len(self.bridges or []))
+
 """
 Relay Uptime object
 
@@ -311,6 +350,9 @@ class RelayUptime:
     g = document.get
     self.fingerprint = g('fingerprint')
     self.uptime = dict([(k, GraphHistory(v)) for k,v in g('uptime').items()])
+
+  def __str__(self):
+    return "Relay uptime history object for %s" % (self.fingerprint or '<no fingerprint>')
 
 
 """
@@ -331,3 +373,6 @@ class Uptime:
     self.bridges_published = g('bridges_published')
     self.relays = [RelayUptime(d) for d in g('relays')]
     self.bridges = [RelayUptime(d) for d in g('bridges')]
+  
+  def __str__(self):
+    return "Uptime document (Containing uptime histories for %d bridges and %d relays)" % (len(self.bridges or []),len(self.relays or []))
