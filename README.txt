@@ -1,6 +1,6 @@
 Beware
 -------
-This is version 0.1.0 of OnionPy. It is mostly untested, has no useful error handling, is not as comprehensive as claimed below, and may pull down megabytes of data from random places on the internet and then use that to overwrite random locations on your hard drive.
+This is version 0.1.1 of OnionPy. It is mostly untested, has no useful error handling, is not as comprehensive as claimed below, and may pull down megabytes of data from random places on the internet and then use that to overwrite random locations on your hard drive.
 
 OnionPy
 ========
@@ -34,5 +34,5 @@ Usage
 License
 =======
 
-Something MITish. See LICENSE.  
+BSD 3-clause. See LICENSE.  
 Portions of this work obviously belong to to OnionOO and therefore the Tor Project. See ONIONOO-LICENSE.
