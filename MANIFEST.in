@@ -1,0 +1,5 @@
+include *.txt
+include setup.py
+recursive-include onion_py *.py
+global-exclude *.pyc
+global-exclude *.pyo

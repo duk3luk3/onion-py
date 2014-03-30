@@ -16,7 +16,12 @@ You can install onion-py manually by doing the following:
     cd onion-py
     sudo python setup.py install
 
-Getting it into pip is planned.
+For the optional memcached support, install pymemcache and six.
+
+    sudo pip install six
+    sudo pip install https://github.com/pinterest/pymemcache.git
+
+Getting it into PyPi is planned.
 
 **Beware**: OnionPy has been developed and tested exclusively with Python 3. Please let Python 2 rest in peace forevermore.
 
