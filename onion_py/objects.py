@@ -183,7 +183,7 @@ class Details:
     self.relays_published = document.get('relays_published')
     self.bridges_published = document.get('bridges_published')
     self.relays = [RelayDetails(d) for d in document.get('relays')]
-    self.bridge = [BridgeDetails(d) for d in document.get('bridges')]
+    self.bridges = [BridgeDetails(d) for d in document.get('bridges')]
 
   def __str__(self):
     return "Details document (%d bridges, %d relays)" % (len(self.bridges or []),len(self.relays or []))
