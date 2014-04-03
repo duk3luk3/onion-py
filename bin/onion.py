@@ -3,6 +3,7 @@
 import sys
 import time
 import onion_py.manager as om
+from onion_py.objects import *
 import random
 from functools import *
 
@@ -20,41 +21,45 @@ def main(argv):
       print("{:<20}{:}".format(k, v[1]))
     
 def family_members(m, n):
-  d = m.query('details', search=n[0], limit=1, type='relay')
+  fields = 'nickname,fingerprint,family,exit_probability'
+  d = m.query('details', search=n[0], limit=1, type='relay', fields=fields)
   if len(d.relays) < 1:
     print("No relay found")
     return
   print("Found relay: %s" % (d.relays[0].nickname,))
-  closed = [d.relays[0]]
-  blacklist = []
-  open = d.relays[0].family
-  while len(open) > 0:
-    print(".")
-    cur = open
-    open = []
-    for c in cur:
-      print("Closed: %s" % ("; ".join(["%s (%s)" % (x.fingerprint, x.nickname) for x in closed]),))
-      if c in ["$"+x.fingerprint for x in closed] or c in [x.nickname for x in closed] or c in blacklist:
-        continue
-      print("Looking up %s" % (c,))
-      d = m.query('details', search=c, limit=1, type='relay')
-      if len(d.relays) > 0:
-        d = d.relays[0]
-        print("Looking up family of %s" % (d.nickname,))
-        if len(d.family) > 0:
-          open = open + d.family
-        if not d.fingerprint in [x.fingerprint for x in closed]:
-          closed.append(d)
+  print("Family: {}".format(d.relays[0].family))
+  check_relay = d.relays[0]
+  valid_relays = [check_relay]
+  invalid_relays = []
+  for f in check_relay.family:
+    d = m.query('details', search=f, limit=1, type='relay', fields=fields)
+    if len(d.relays) > 0:
+      if family_check(d.relays[0].family, check_relay):
+        valid_relays.append(d.relays[0])
       else:
-        blacklist.append(c)
-  print([x.nickname for x in closed])
-  print("not found: %s" % (blacklist,))
+        invalid_relays.append(d.relays[0])
+    else:
+      invalid_relays.append(RelayDetails({'nickname': f}))
+  print("Valid family members  : {}".format(", ".join([str(x) for x in valid_relays])))
+  print("Invalid family members: {}".format(", ".join([str(x) for x in invalid_relays])))
+  p = 0.0
+  for r in valid_relays:
+    p = p + r.exit_probability or 0.0
+  print("Aggregate exit probability: {}".format(p))
+
+
+
+def family_check(family_strings, relay):
+  for f in family_strings:
+   if (relay.nickname == f or '$'+relay.fingerprint == f):
+     return True
+  return False
 
 def test(m,n):
   d = m.query('summary', limit=4)
   print("Summary limited to 4: >>%s<<" % (d,))
   while True:
-    num = random.randint(0,1500)
+    num = random.randint(0,150)
     d = m.query('details', limit=1, offset=num)
     print("Details for one relay: >>%s<<" % (d.relays[0],))
     d = m.query('bandwidth', limit=1, offset=num)
