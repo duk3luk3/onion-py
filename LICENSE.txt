@@ -1,7 +1,7 @@
 Parts of this work are Copyright 2011, 2012 The Tor Project - see 
 ONIONOO-LICENSE
 
-Copyright 2013 Lukas Erlacher
+Copyright 2014 Lukas Erlacher
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
