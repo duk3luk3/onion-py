@@ -1,3 +1,8 @@
+"""
+Onion-Py Manager
+
+Logic for interacting with OnionOO
+"""
 import requests
 import json
 import onion_py.objects as o
@@ -10,24 +15,6 @@ class BadRequestError(OnionPyError):
 
 class ServiceUnavailableError(OnionPyError):
   pass
-
-def json_serializer(key, value):
-  if type(value) == str:
-    return value, 1
-  return json.dumps(value).encode('utf-8'), 2
-
-def json_deserializer(key, value, flags):
-  if flags == 1:
-    return value
-  if flags == 2:
-    return json.loads(value.decode('utf-8'))
-  raise Exception("Unknown serialization format")
-
-def key_serializer(query, params):
-  s = query + ';';
-  for key in Manager.OOO_QUERYPARAMS:
-    s = s + str(params.get(key))+';'
-  return s
 
 """
 The main OnionOO api wrapper class.
@@ -69,14 +56,8 @@ class Manager:
     memcached_host: tuple (hostname, port) - if set to None, caching of responses in memcached will be disabled.
     onionoo_host: hostname for the onionoo api endpoint - defaults to canonical onionoo.torproject.org
   """
-  def __init__(self, memcached_host = ('localhost', 11211), onionoo_host = None):
-    self.memcached_host = memcached_host
-    if self.memcached_host is not None:
-      from pymemcache.client import Client
-      self.memcached_client = Client(self.memcached_host, serializer=json_serializer, deserializer=json_deserializer)
-    else:
-      self.memcached_client = None
-
+  def __init__(self, cache = None, onionoo_host = None):
+    self.cache_client = cache
     self.onionoo_host = onionoo_host or self.OOO_URL
 
   def query(self, query, **kwargs):
@@ -97,9 +78,8 @@ class Manager:
 
     # check for cache entry
     cache_entry = None
-    cache_key = key_serializer(query, params)
-    if self.memcached_client is not None:
-      cache_entry = self.memcached_client.get(cache_key)
+    if self.cache_client is not None:
+      cache_entry = self.cache_client.get(query, params)
 
     result = None
 
@@ -120,9 +100,9 @@ class Manager:
       if r.status_code == 200:
         result = r.json()
         # Save to cache
-        if self.memcached_client is not None:
+        if self.cache_client is not None:
           cache_entry = { 'timestamp': r.headers['Last-Modified'], 'record': result }
-          self.memcached_client.set(cache_key, cache_entry)
+          self.cache_client.set(query, params, cache_entry)
       elif r.status_code == 400:
         raise BadRequestError("OnionPy did not accept our query: {}".format(r.status))
       elif r.status_code in [500, 503]:

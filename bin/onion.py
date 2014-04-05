@@ -4,12 +4,14 @@ import sys
 import time
 import onion_py.manager as om
 from onion_py.objects import *
+from onion_py.caching import OnionSimpleCache
 import random
 from functools import *
 
 
 def main(argv):
-  manager = om.Manager(None)
+  cache = OnionSimpleCache()
+  manager = om.Manager(cache)
 
   if len(argv) > 1 and argv[1] in handlers:
     handlers[argv[1]][0](manager, argv[2:])
@@ -19,6 +21,8 @@ def main(argv):
     print("Commands:")
     for k,v in handlers.items():
       print("{:<20}{:}".format(k, v[1]))
+
+  print(cache.dict)
     
 def family_members(m, n):
   fields = 'nickname,fingerprint,family,exit_probability'
