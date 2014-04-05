@@ -22,30 +22,32 @@ def main(argv):
     
 def family_members(m, n):
   fields = 'nickname,fingerprint,family,exit_probability'
-  d = m.query('details', search=n[0], limit=1, type='relay', fields=fields)
-  if len(d.relays) < 1:
-    print("No relay found")
-    return
-  print("Found relay: %s" % (d.relays[0].nickname,))
-  print("Family: {}".format(d.relays[0].family))
-  check_relay = d.relays[0]
-  valid_relays = [check_relay]
-  invalid_relays = []
-  for f in check_relay.family:
-    d = m.query('details', search=f, limit=1, type='relay', fields=fields)
-    if len(d.relays) > 0:
-      if family_check(d.relays[0].family, check_relay):
-        valid_relays.append(d.relays[0])
+  for s in n:
+    d = m.query('details', search=s, limit=1, type='relay', fields=fields)
+    if len(d.relays) < 1:
+      print("No relay found for search term '{}'".format(s))
+      continue
+
+    check_relay = d.relays[0]
+    valid_relays = [check_relay]
+    invalid_relays = []
+    for f in check_relay.family:
+      d = m.query('details', search=f, limit=1, type='relay', fields=fields)
+      if len(d.relays) > 0:
+        if family_check(d.relays[0].family, check_relay):
+          valid_relays.append(d.relays[0])
+        else:
+          invalid_relays.append(d.relays[0])
       else:
-        invalid_relays.append(d.relays[0])
-    else:
-      invalid_relays.append(RelayDetails({'nickname': f}))
-  print("Valid family members  : {}".format(", ".join([str(x) for x in valid_relays])))
-  print("Invalid family members: {}".format(", ".join([str(x) for x in invalid_relays])))
-  p = 0.0
-  for r in valid_relays:
-    p = p + r.exit_probability or 0.0
-  print("Aggregate exit probability: {}".format(p))
+        invalid_relays.append(RelayDetails({'nickname': f}))
+    print("Finished aggregation for {}".format(s))
+    print("Valid family members  : {}".format(", ".join([x.nickname or x.fingerprint for x in valid_relays])))
+    if len(invalid_relays) > 0:
+      print("Invalid family members: {}".format(", ".join([str(x) for x in invalid_relays])))
+    p = 0.0
+    for r in valid_relays:
+      p = p + r.exit_probability or 0.0
+    print("Aggregate exit probability: {}".format(p))
 
 
 
@@ -75,7 +77,7 @@ def test(m,n):
       print("That relay had no history.")
 
 handlers = {
-    'family-members': [family_members, 'pass a relay nickname or fingerprint and the relay\'s family will be enumerated'],
+    'family-members': [family_members, 'pass relay nicknames or fingerprints and the relay\'s families will be enumerated and an aggregate exit probability calculated'],
     'test': [test, 'a short test making a couple of calls']
     }
 
