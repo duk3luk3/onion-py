@@ -2,7 +2,14 @@ import requests
 import json
 import onion_py.objects as o
 
-UseDefault = object()
+class OnionPyError(Exception):
+  pass
+
+class BadRequestError(OnionPyError):
+  pass
+
+class ServiceUnavailableError(OnionPyError):
+  pass
 
 def json_serializer(key, value):
   if type(value) == str:
@@ -102,6 +109,10 @@ class Manager:
       r = requests.head(url, params=params, headers=headers)
       if r.status_code == 304:
         result = cache_entry['record']
+      elif r.status_code == 400:
+        raise BadRequestError("OnionPy did not accept our query: {}".format(r.status))
+      elif r.status_code in [500, 503]:
+        raise ServiceUnavailableError('OnionPy is down: {}'.format(r.status))
 
     if result is None:
       # Make full request
@@ -112,6 +123,10 @@ class Manager:
         if self.memcached_client is not None:
           cache_entry = { 'timestamp': r.headers['Last-Modified'], 'record': result }
           self.memcached_client.set(cache_key, cache_entry)
+      elif r.status_code == 400:
+        raise BadRequestError("OnionPy did not accept our query: {}".format(r.status))
+      elif r.status_code in [500, 503]:
+        raise ServiceUnavailableError('OnionPy is down: {}'.format(r.status))
 
     if result is not None:
       return self.OOO_QUERIES[query](result)
