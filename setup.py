@@ -13,6 +13,8 @@ setup(
     packages=['onion_py'],
     scripts=['bin/onion.py'],
 
+    install_requires = ['requests>=2.2.1'],
+
     extras_require = {
       'Query caching': ['pymemcache>=1.2.1']
       },
