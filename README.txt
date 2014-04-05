@@ -1,7 +1,3 @@
-Beware
--------
-This is version 0.1.1 of OnionPy. It is mostly untested, has no useful error handling, is not as comprehensive as claimed below, and may pull down megabytes of data from random places on the internet and then use that to overwrite random locations on your hard drive.
-
 OnionPy
 ========
 
@@ -30,8 +26,9 @@ Getting it into PyPi is planned.
 Usage
 =====
 
-    >>> import onion_py.manager as m
-    >>> manager = m.Manager(None)
+    >>> from onion_py.manager import Manager
+    >>> from onion_py.caching import OnionSimpleCache
+    >>> manager = Manager(OnionSimpleCache())
     >>> s = manager.query('summary', limit=4)
     >>> s.relays[0].fingerprint
     '695D027F728A3B95D0D7F6464D63F82229BFA361'
