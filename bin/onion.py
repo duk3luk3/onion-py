@@ -7,6 +7,7 @@ from onion_py.objects import *
 from onion_py.caching import OnionSimpleCache
 import random
 from functools import *
+import fileinput
 
 
 def main(argv):
@@ -22,7 +23,19 @@ def main(argv):
     for k,v in handlers.items():
       print("{:<20}{:}".format(k, v[1]))
 
-  print(cache.dict)
+def atlas(m, n):
+  fields = 'nickname,fingerprint,last_seen,running,flags,advertised_bandwidth,or_addresses'
+  print(fields)
+  for line in sys.stdin.readlines():
+    l = line.split(",")
+    if len(l) >= 3:
+      fp = l[2]
+      d = m.query('details',lookup=fp, limit=1, type='relay', field=fields)
+      if len(d.relays) < 1:
+        print('not_found,{},...'.format(fp))
+      else:
+        r = d.relays[0]
+        print(",".join([d.nickname,d.fingerprint,d.last_seen,d.running,d.flags,d.bandwidth[3],d.or_addresses[0]]))
     
 def family_members(m, n):
   fields = 'nickname,fingerprint,family,exit_probability'
@@ -82,6 +95,7 @@ def test(m,n):
 
 handlers = {
     'family-members': [family_members, 'pass relay nicknames or fingerprints and the relay\'s families will be enumerated and an aggregate exit probability calculated'],
+    'list': [atlas, 'pass fingerprints on stdin to list some of their details'],
     'test': [test, 'a short test making a couple of calls']
     }
 
