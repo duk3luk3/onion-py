@@ -1,1 +1,1 @@
-__all__ = ["manager","objects"]
+__all__ = ["manager","objects","caching"]
