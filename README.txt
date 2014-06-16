@@ -6,7 +6,7 @@ A comprehensive pure-Python wrapper for the OnionOO Tor status API, with memcach
 Installing OnionPy
 ===================
 
-You can install onion-py manually by doing the following (requires setuptools!):
+You can install onion-py manually by doing the following (requires setuptools!)::
 
     git clone https://github.com/duk3luk3/onion-py.git
     cd onion-py
@@ -14,12 +14,12 @@ You can install onion-py manually by doing the following (requires setuptools!):
     PYTHONPATH=. python bin/onion.py test
     sudo python setup.py install
 
-For the optional memcached support, install pymemcache and six.
+For the optional memcached support, install pymemcache and six::
 
     sudo pip install six
     sudo pip install https://github.com/pinterest/pymemcache.git
 
-Getting it into PyPi is planned.
+The package is also on [Pypi](https://pypi.python.org/pypi/OnionPy).
 
 **Beware**: <del>OnionPy has been developed and tested exclusively with Python 3. Please let Python 2 rest in peace forevermore.</del> OnionPy is compatible with Python 2.7 upwards.
 
