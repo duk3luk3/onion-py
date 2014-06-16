@@ -90,9 +90,9 @@ class Manager:
       if r.status_code == 304:
         result = cache_entry['record']
       elif r.status_code == 400:
-        raise BadRequestError("OnionPy did not accept our query: {}".format(r.status))
+        raise BadRequestError("OnionPy did not accept our query: {} ({})".format(r.reason, r.url))
       elif r.status_code in [500, 503]:
-        raise ServiceUnavailableError('OnionPy is down: {}'.format(r.status))
+        raise ServiceUnavailableError('OnionPy is down: {}'.format(r.reason))
 
     if result is None:
       # Make full request
@@ -104,9 +104,9 @@ class Manager:
           cache_entry = { 'timestamp': r.headers['Last-Modified'], 'record': result }
           self.cache_client.set(query, params, cache_entry)
       elif r.status_code == 400:
-        raise BadRequestError("OnionPy did not accept our query: {}".format(r.status))
+        raise BadRequestError("OnionPy did not accept our query: {} ({})".format(r.reason, r.url))
       elif r.status_code in [500, 503]:
-        raise ServiceUnavailableError('OnionPy is down: {}'.format(r.status))
+        raise ServiceUnavailableError('OnionPy is down: {}'.format(r.reason))
 
     if result is not None:
       return self.OOO_QUERIES[query](result)
