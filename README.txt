@@ -21,7 +21,7 @@ For the optional memcached support, install pymemcache and six.
 
 Getting it into PyPi is planned.
 
-**Beware**: OnionPy has been developed and tested exclusively with Python 3. Please let Python 2 rest in peace forevermore.
+**Beware**: <del>OnionPy has been developed and tested exclusively with Python 3. Please let Python 2 rest in peace forevermore.</del> OnionPy is compatible with Python 2.7 upwards.
 
 Usage
 =====
