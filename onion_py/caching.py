@@ -3,6 +3,7 @@ Onion-Py caching backends
 """
 
 from onion_py.manager import Manager
+import json
 
 class NotImplementedError(Exception):
   pass
@@ -54,13 +55,13 @@ class OnionSimpleCache(OnionCache):
 class OnionMemcached(OnionCache):
   def __init__(self, host=('localhost', 11211)):
       from pymemcache.client import Client
-      self.memcached_client = Client(self.memcached_host, serializer=json_serializer, deserializer=json_deserializer)
+      self.memcached_client = Client(host, serializer=json_serializer, deserializer=json_deserializer)
 
   def get(self, query, params):
     return self.memcached_client.get(key_serializer(query,params))
 
   def set(self, query, params, document):
-    return self.memcache_client.set(key_serializer(query,params),document)
+    return self.memcached_client.set(key_serializer(query,params),document)
 
 
 
