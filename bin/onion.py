@@ -11,14 +11,28 @@ import fileinput
 
 
 def main(argv):
-  cache = OnionMemcached()
+  cache = None
+  command = None
+  args = None
+  if argv[1] == 'mc':
+    cache = OnionMemcached()
+    if len(argv) > 2 and argv[2] in handlers:
+      command = argv[2]
+      params = argv[3:]
+  else:
+    cache = OnionSimpleCache()
+    if len(argv) > 1 and argv[1] in handlers:
+      command = argv[1]
+      params = argv[2:]
+
   manager = om.Manager(cache)
 
-  if len(argv) > 1 and argv[1] in handlers:
-    handlers[argv[1]][0](manager, argv[2:])
+  if command is not None:
+    handlers[command][0](manager, params)
   else:
     print("Usage:")
-    print(argv[0] + " <command>")
+    print(argv[0] + "[mc] <command>")
+    print("Specify 'mc' as first argument to enable memcached caching")
     print("Commands:")
     for k,v in handlers.items():
       print("{:<20}{:}".format(k, v[1]))

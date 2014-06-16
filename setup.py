@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="OnionPy",
-    version="0.1.3",
+    version="0.1.4",
     description="Python wrapper for the OnionOO tor status API",
     long_description=open('README.txt').read(),
     author="Lukas Erlacher",
@@ -16,7 +16,7 @@ setup(
     install_requires = ['requests>=2.2.1'],
 
     extras_require = {
-      'Query caching': ['pymemcache>=1.2.1']
+      'Query caching': ['pymemcache>=1.2.1','six']
       },
     dependency_links = [
       'git+https://github.com/pinterest/pymemcache.git'
