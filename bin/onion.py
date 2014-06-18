@@ -14,16 +14,17 @@ def main(argv):
   cache = None
   command = None
   args = None
-  if argv[1] == 'mc':
-    cache = OnionMemcached()
-    if len(argv) > 2 and argv[2] in handlers:
-      command = argv[2]
-      params = argv[3:]
-  else:
-    cache = OnionSimpleCache()
-    if len(argv) > 1 and argv[1] in handlers:
-      command = argv[1]
-      params = argv[2:]
+  if len(argv) >= 2:
+    if argv[1] == 'mc':
+      cache = OnionMemcached()
+      if len(argv) > 2 and argv[2] in handlers:
+        command = argv[2]
+        params = argv[3:]
+    else:
+      cache = OnionSimpleCache()
+      if len(argv) > 1 and argv[1] in handlers:
+        command = argv[1]
+        params = argv[2:]
 
   manager = om.Manager(cache)
 
@@ -31,28 +32,30 @@ def main(argv):
     handlers[command][0](manager, params)
   else:
     print("Usage:")
-    print(argv[0] + "[mc] <command>")
-    print("Specify 'mc' as first argument to enable memcached caching")
+    print(argv[0] + " [mc] <command>")
+    print("Specify 'mc' as first argument to enable memcached caching (requires memcached running)")
     print("Commands:")
     for k,v in handlers.items():
       print("{:<20}{:}".format(k, v[1]))
 
+  print("Onion.py done, some debug output follows")
+
   if isinstance(cache, OnionSimpleCache):
+    print("Cache entries:")
     print(cache.dict)
 
 def atlas(m, n):
   fields = 'nickname,fingerprint,last_seen,running,flags,advertised_bandwidth,or_addresses'
   print(fields)
   for line in sys.stdin.readlines():
-    l = line.split(",")
-    if len(l) >= 3:
-      fp = l[2]
-      d = m.query('details',lookup=fp, limit=1, type='relay', field=fields)
-      if len(d.relays) < 1:
-        print('not_found,{},...'.format(fp))
-      else:
-        r = d.relays[0]
-        print(",".join([d.nickname,d.fingerprint,d.last_seen,d.running,d.flags,d.bandwidth[3],d.or_addresses[0]]))
+    l = line.strip().split(",")
+    fp = l[2] if len(l) >= 3 else l[0]
+    d = m.query('details',lookup=fp, limit=1, type='relay', field=fields)
+    if len(d.relays) < 1:
+      print('not_found,{},...'.format(fp))
+    else:
+      r = d.relays[0]
+      print(",".join([str(x) for x in [r.nickname,r.fingerprint,r.last_seen,r.running,r.flags,r.bandwidth[3],r.or_addresses[0]]]))
     
 def family_members(m, n):
   fields = 'nickname,fingerprint,family,exit_probability'
