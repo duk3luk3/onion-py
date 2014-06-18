@@ -225,8 +225,9 @@ class BandwidthDetail:
   def __init__(self, document):
     g = document.get
     self.finger_print = g('fingerprint')
-    self.write_history = dict([(k, GraphHistory(v)) for k,v in g('write_history').items()])
-    self.read_history = dict([(k, GraphHistory(v)) for k,v in g('read_history').items()])
+    self.write_history = dict([(k, GraphHistory(v)) for k,v in g('write_history').items()]) if g('write_history') is not None else None
+    self.read_history = dict([(k, GraphHistory(v)) for k,v in g('read_history').items()]) if g('read_history') is not None else None
+
 
   def __str__(self):
     return "Bandwidth object"
