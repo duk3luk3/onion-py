@@ -35,6 +35,17 @@ Usage
     >>> s.relays[0].nickname
     'GREATWHITENORTH'
 
+Accepted Queries
+=====
+    Summary, details, bandwidth, weights, clients, uptime
+
+    >>> s = manager.query('summary', limit=4)
+    >>> s = manager.query('details', limit=4)
+    >>> s = manager.query('bandwidth', limit=4)
+    >>> s = manager.query('weights', limit=4)
+    >>> s = manager.query('clients', limit=4)
+    >>> s = manager.query('uptime', limit=4)
+
 License
 =======
 
