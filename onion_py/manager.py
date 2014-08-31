@@ -10,6 +10,42 @@ import onion_py.objects as o
 class OnionPyError(Exception):
   pass
 
+class InvalidDocumentTypeError(OnionPyError):
+    """ Raised when document type requested is not supported by Onionoo """
+    def __init__(self, doc_type):
+        self.doc_type = doc_type
+
+    def __str__(self):
+        return 'Invalid document type ' + repr(self.doc_type)
+
+
+class InvalidParameterError(OnionPyError):
+    """ Raised when a request parameter is not supported by Onionoo """
+    def __init__(self, param):
+        self.param = param
+
+    def __str__(self):
+        return 'Invalid parameter ' + repr(self.param)
+
+
+class OnionooError(OnionPyError):
+    """ Raised when Onionoo responds with an error code """
+    def __init__(self, code, msg):
+        self.code = code
+        self.msg = msg
+
+    def __str__(self):
+        return str(self.code) + ' - ' + self.msg
+
+
+class DataError(OnionPyError):
+    """ Raised due to insufficient/inconsistent data """
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
 class BadRequestError(OnionPyError):
   pass
 
@@ -61,12 +97,15 @@ class Manager:
     self.onionoo_host = onionoo_host or self.OOO_URL
 
   def query(self, query, **kwargs):
-    #TODO: Proper validation of parameters
+    if query not in self.OOO_QUERIES:
+      raise InvalidDocumentTypeError(query)
 
-    params = dict((k,v) for k,v in kwargs.items() if k in self.OOO_QUERYPARAMS)
-    if len(params) < len(kwargs):
-      #TODO: Handle this properly by logging or raising
-      pass
+    # Check if request parameters are valid
+    for param in kwargs.keys():
+      if param not in self.OOO_QUERYPARAMS:
+         raise InvalidParameterError(param)
+
+    params = kwargs
 
     # turn list params into comma-separated strings
     for param in ['fields','order']:
@@ -90,7 +129,8 @@ class Manager:
       if r.status_code == 304:
         result = cache_entry['record']
       elif r.status_code == 400:
-        raise BadRequestError("OnionPy did not accept our query: {} ({})".format(r.reason, r.url))
+        raise BadRequestError("OnionPy did not accept our query: {} ({})".\
+            format(r.reason, r.url))
       elif r.status_code in [500, 503]:
         raise ServiceUnavailableError('OnionPy is down: {}'.format(r.reason))
 
@@ -101,10 +141,12 @@ class Manager:
         result = r.json()
         # Save to cache
         if self.cache_client is not None:
-          cache_entry = { 'timestamp': r.headers['Last-Modified'], 'record': result }
+          cache_entry = { 'timestamp': r.headers['Last-Modified'],
+              'record': result }
           self.cache_client.set(query, params, cache_entry)
       elif r.status_code == 400:
-        raise BadRequestError("OnionPy did not accept our query: {} ({})".format(r.reason, r.url))
+        raise BadRequestError("OnionPy did not accept our query: {} ({})".\
+            format(r.reason, r.url))
       elif r.status_code in [500, 503]:
         raise ServiceUnavailableError('OnionPy is down: {}'.format(r.reason))
 

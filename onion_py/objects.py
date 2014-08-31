@@ -2,6 +2,9 @@
 Class wrappers for the OnionOO objects
 """
 
+import string
+import re
+
 """
 Relay summary field
 
@@ -19,7 +22,8 @@ class RelaySummary:
     self.running = document.get('r')
 
   def __str__(self):
-    return "Relay summary for %s (%s) " % (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
+    return "Relay summary for %s (%s) " % \
+      (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
 
 """
 Bridge summary field
@@ -36,7 +40,8 @@ class BridgeSummary:
     self.running = document.get('r')
 
   def __str__(self):
-    return "Bridge summary for %s (%s) " % (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
+    return "Bridge summary for %s (%s) " % \
+      (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
 
 """
 Summary document
@@ -58,7 +63,8 @@ class Summary:
     self.bridges = [BridgeSummary(d) for d in document.get('bridges')]
 
   def __str__(self):
-    return "Summary document (%d bridges, %d relays)" % (len(self.bridges or []),len(self.relays or []))
+    return "Summary document (%d bridges, %d relays)" % \
+      (len(self.bridges or []),len(self.relays or []))
 
 
 """
@@ -109,13 +115,15 @@ class RelayDetails:
     self.running = g('running')
     self.hibernating = g('hibernating')
     self.flags = g('flags')
-    self.geo = (g('country'),g('country_name'),g('region_name'),g('city_name'),g('latitude'),g('longitude'))
+    self.geo = (g('country'),g('country_name'),g('region_name'), \
+      g('city_name'),g('latitude'),g('longitude'))
     self.as_number = g('as_number')
     self.as_name = g('as_name')
     self.consensus_weight = g('consensus_weight')
     self.host_name = g('host_name')
     self.last_restarted = g('last_restarted')
-    self.bandwidth = (g('bandwidth_rate'),g('bandwidth_burst'),g('bandwidth_observed'),g('bandwidth_advertised'))
+    self.bandwidth = (g('bandwidth_rate'),g('bandwidth_burst'), \
+      g('bandwidth_observed'),g('bandwidth_advertised'))
     self.exit_policy = g('exit_policy')
     self.exit_policy_summary = g('exit_summary_policy')
     self.exit_policy_v6_summary = g('exit_policy_v6_policy')
@@ -129,8 +137,69 @@ class RelayDetails:
     self.middle_probability = g('middle_probability')
     self.exit_probability = g('exit_probability')
 
+  def is_stable(self):
+    return self.flags is not None and 'Stable' in self.flags
+
+  def is_hibernating(self):
+    return self.hibernating is True
+
+  def is_bandwidth_low(self, bw):
+    if self.bandwidth is not None:
+      return (relay.bandwidth[2] < bw)
+    else:
+      return None
+
+  def check_exitport(self):
+    def in_ports(ports):
+      for entry in ports:
+        if entry == '80':
+          return True
+        elif '-' in entry:
+          [x,y] = entry.split('-')
+          if 80 in range(int(x), int(y)):
+            return True
+      return False
+
+    if 'accept' in self.exit_policy_summary:
+      return in_ports(self.exit_policy_summary['accept'])
+    elif 'reject' in self.exit_policy_summar:
+      return not in_ports(self.exit_policy_summary['reject'])
+    return False
+
+  def parse_email(self):
+    """
+    Parse the email address from a RelayDetails object of Details document.
+
+    @rtype: str
+    @return: The email address of relay specified in the contact field.
+    If the email address cannot be parsed, the empty string.
+    """
+
+    contact = self.contact
+    if contact is None:
+      return ""
+    punct = string.punctuation
+    clean_line = contact.replace('<', '').replace('>', '')
+
+    email = re.search('[^\s]+'
+              '(?:@|[' + punct + '\s]+at[' + punct + '\s]+).+'
+              '(?:\.|[' + punct + '\s]+dot[' + punct + '\s]+)[^\n\s\)\(]+',
+              clean_line, re.IGNORECASE)
+
+    if email is not None and email != "":
+      email = email.group()
+      email = email.lower()
+      email = re.sub('[' + punct + '\s]+(at|ta)[' + punct + '\s]+', '@', email)
+      email = re.sub('[' + punct + '\s]+(dot|tod|d0t)[' + punct + '\s]+', '.',
+          email)
+      email = re.sub('[' + punct + '\s]+hyphen[' + punct + '\s]+', '-', email)
+
+    return email
+
+
   def __str__(self):
-    return "Detailed relay descriptor for %s (%s)" % (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
+    return "Detailed relay descriptor for %s (%s)" % \
+      (self.nickname or "<Not named>", self.fingerprint or "<No fingerprint>")
 
 """
 Bridge Details field
@@ -164,7 +233,9 @@ class BridgeDetails:
     self.pool_assignment = g('pool_assignment')
 
   def __str__(self):
-    return "Detailed bridge descriptor for %s (%s)" % (self.nickname or "<Not named>", self.hashed_fingerprint or "<No fingerprint>")
+    return "Detailed bridge descriptor for %s (%s)" % \
+      (self.nickname or "<Not named>", self.hashed_fingerprint or
+        "<No fingerprint>")
 
 
 """
@@ -186,7 +257,8 @@ class Details:
     self.bridges = [BridgeDetails(d) for d in document.get('bridges')]
 
   def __str__(self):
-    return "Details document (%d bridges, %d relays)" % (len(self.bridges or []),len(self.relays or []))
+    return "Details document (%d bridges, %d relays)" % \
+      (len(self.bridges or []),len(self.relays or []))
 
 """
 Graph history object
@@ -225,8 +297,10 @@ class BandwidthDetail:
   def __init__(self, document):
     g = document.get
     self.finger_print = g('fingerprint')
-    self.write_history = dict([(k, GraphHistory(v)) for k,v in g('write_history').items()]) if g('write_history') is not None else None
-    self.read_history = dict([(k, GraphHistory(v)) for k,v in g('read_history').items()]) if g('read_history') is not None else None
+    self.write_history = dict([(k, GraphHistory(v)) for k,v in
+      g('write_history').items()]) if g('write_history') is not None else None
+    self.read_history = dict([(k, GraphHistory(v)) for k,v in
+      g('read_history').items()]) if g('read_history') is not None else None
 
 
   def __str__(self):
@@ -252,7 +326,8 @@ class Bandwidth:
     self.bridges = [BandwidthDetail(d) for d in g('bridges')]
 
   def __str__(self):
-    return "Bandwidth document (Containing bandwidth histories for %d bridges and %d relays)" % (len(self.bridges or []),len(self.relays or []))
+    return "Bandwidth document (histories of %d bridges and %d relays)" % \
+      (len(self.bridges or []),len(self.relays or []))
 
 """
 Relay weight object
@@ -269,14 +344,25 @@ class RelayWeight:
   def __init__(self, document):
     g = document.get
     self.fingerprint = g('fingerprint')
-    self.advertised_bandwidth_fraction = dict([(k, GraphHistory(v)) for k,v in g('advertised_bandwidth_fraction').items()])
-    self.consensus_weight_fraction = dict([(k, GraphHistory(v)) for k,v in g('consensus_weight_fraction').items()])
-    self.guard_probability = dict([(k, GraphHistory(v)) for k,v in g('guard_probability').items()])
-    self.middle_probability = dict([(k, GraphHistory(v)) for k,v in g('middle_probability').items()])
-    self.exit_probability = dict([(k, GraphHistory(v)) for k,v in g('exit_probability').items()])
+    self.advertised_bandwidth_fraction = dict([(k, GraphHistory(v)) for k,v in
+      g('advertised_bandwidth_fraction').items()]) if \
+        g('advertised_bandwidth_fraction') is not None else None
+    self.consensus_weight_fraction = dict([(k, GraphHistory(v)) for k,v in
+      g('consensus_weight_fraction').items()]) if \
+          g('consensus_weight_fraction') is not None else None
+    self.guard_probability = dict([(k, GraphHistory(v)) for k,v in
+      g('guard_probability').items()]) if \
+        g('guard_probability') is not None else None
+    self.middle_probability = dict([(k, GraphHistory(v)) for k,v in
+      g('middle_probability').items()]) if \
+        g('middle_probability') is not None else None
+    self.exit_probability = dict([(k, GraphHistory(v)) for k,v in
+      g('exit_probability').items()]) if \
+        g('exit_probability') is not None else None
 
   def __str__(self):
-    return "relay weight object for %s" % (self.fingerprint or '<no fingerprint>')
+    return "relay weight object for %s" % \
+      (self.fingerprint or '<no fingerprint>')
 
 """
 Weights document
@@ -294,11 +380,13 @@ class Weights:
     g = document.get
     self.relays_published = g('relays_published')
     self.bridges_published = g('bridges_published')
-    self.relays = [RelayWeight(d) for d in g('relays')]
+    self.relays = [RelayWeight(d) for d in g('relays')] if \
+      g('relays') is not None else None
     self.bridges = []
 
   def __str__(self):
-    return "Weights document containing weight history for %d relays)" % (len(self.relays or []))
+    return "Weights document containing weight history for %d relays)" % \
+        (len(self.relays or []))
 
 """
 Bridge client object
@@ -311,10 +399,13 @@ class BridgeClient:
   def __init__(self, document):
     g = document.get
     self.fingerprint = g('fingerprint')
-    self.average_clients = dict([(k, GraphHistory(v)) for k,v in g('average_clients').items()])
+    self.average_clients = dict([(k, GraphHistory(v)) for k,v
+      in g('average_clients').items()]) if \
+        g('average_clients') is not None else None
 
   def __str__(self):
-    return "Bridge client history object for %s" % (self.fingerprint or '<no fingerprint>')
+    return "Bridge client history object for %s" % \
+      (self.fingerprint or '<no fingerprint>')
 
 
 """
@@ -334,10 +425,12 @@ class Clients:
     self.relays_published = g('relays_published')
     self.bridges_published = g('bridges_published')
     self.relays = []
-    self.bridges = [BridgeClient(d) for d in g('bridges')]
+    self.bridges = [BridgeClient(d) for d in g('bridges')] if \
+        g('bridges') is not None else None
 
   def __str__(self):
-    return "Clients document containing client histories for %d bridges" % (len(self.bridges or []))
+    return "Clients document containing client histories for %d bridges" % \
+      (len(self.bridges or []))
 
 """
 Relay Uptime object
@@ -350,10 +443,12 @@ class RelayUptime:
   def __init__(self, document):
     g = document.get
     self.fingerprint = g('fingerprint')
-    self.uptime = dict([(k, GraphHistory(v)) for k,v in g('uptime').items()])
+    self.uptime = dict([(k, GraphHistory(v)) for k,v in g('uptime').items()]) \
+      if g('uptime') is not None else None
 
   def __str__(self):
-    return "Relay uptime history object for %s" % (self.fingerprint or '<no fingerprint>')
+    return "Relay uptime history object for %s" % \
+      (self.fingerprint or '<no fingerprint>')
 
 
 """
@@ -372,8 +467,11 @@ class Uptime:
     g = document.get
     self.relays_published = g('relays_published')
     self.bridges_published = g('bridges_published')
-    self.relays = [RelayUptime(d) for d in g('relays')]
-    self.bridges = [RelayUptime(d) for d in g('bridges')]
-  
+    self.relays = [RelayUptime(d) for d in g('relays')] if \
+        g('relays') is not None else None
+    self.bridges = [RelayUptime(d) for d in g('bridges')] if \
+        g('bridges') is not None else None
+
   def __str__(self):
-    return "Uptime document (Containing uptime histories for %d bridges and %d relays)" % (len(self.bridges or []),len(self.relays or []))
+    return "Uptime document (Containing uptime histories for %d bridges\
+        and %d relays)" % (len(self.bridges or []),len(self.relays or []))
