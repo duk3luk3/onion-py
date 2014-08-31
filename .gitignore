@@ -1,3 +1,6 @@
 **/__pycache__/
 MANIFEST
 *.pyc
+OnionPy.egg-info/
+build/
+dist/
