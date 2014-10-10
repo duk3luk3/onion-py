@@ -460,6 +460,25 @@ class RelayUptime:
 
 
 """
+Bridge Uptime object
+
+The bridge uptime object contains:
+  - fingerprint
+  - uptime
+"""
+class BridgeUptime:
+  def __init__(self, document):
+    g = document.get
+    self.fingerprint = g('fingerprint')
+    self.uptime = dict([(k, GraphHistory(v)) for k,v in g('uptime').items()]) \
+      if g('uptime') is not None else None
+
+  def __str__(self):
+    return "Bridge uptime history object for %s" % \
+      (self.fingerprint or '<no fingerprint>')
+
+
+"""
 Uptime document
 
 https://onionoo.torproject.org/#uptime
