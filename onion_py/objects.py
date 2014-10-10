@@ -123,10 +123,10 @@ class RelayDetails:
     self.host_name = g('host_name')
     self.last_restarted = g('last_restarted')
     self.bandwidth = (g('bandwidth_rate'),g('bandwidth_burst'), \
-      g('bandwidth_observed'),g('bandwidth_advertised'))
+      g('observed_bandwidth'),g('advertised_bandwidth'))
     self.exit_policy = g('exit_policy')
-    self.exit_policy_summary = g('exit_summary_policy')
-    self.exit_policy_v6_summary = g('exit_policy_v6_policy')
+    self.exit_policy_summary = g('exit_policy_summary')
+    self.exit_policy_v6_summary = g('exit_policy_v6_summary')
     self.contact = g('contact')
     self.platform = g('platform')
     self.recommended_version = g('recommended_version')
@@ -222,7 +222,7 @@ class BridgeDetails:
     g = document.get
     self.nickname = g('nickname')
     self.hashed_fingerprint = g('hashed_fingerprint')
-    self.or_address = g('or_address')
+    self.or_addresses = g('or_addresses')
     self.last_seen = g('last_seen')
     self.first_seen = g('first_seen')
     self.running = g('running')
