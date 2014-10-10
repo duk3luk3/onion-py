@@ -339,6 +339,8 @@ The relay weight object contains:
   - guard_probability
   - middle_probability
   - exit_probability
+  - advertised_bandwidth
+  - consensus_weight
 """
 class RelayWeight:
   def __init__(self, document):
@@ -359,6 +361,12 @@ class RelayWeight:
     self.exit_probability = dict([(k, GraphHistory(v)) for k,v in
       g('exit_probability').items()]) if \
         g('exit_probability') is not None else None
+    self.advertised_bandwidth = dict([(k, GraphHistory(v)) for k,v in
+      g('advertised_bandwidth').items()]) if \
+        g('advertised_bandwidth') is not None else None
+    self.consensus_weight = dict([(k, GraphHistory(v)) for k,v in
+      g('consensus_weight').items()]) if \
+        g('consensus_weight') is not None else None
 
   def __str__(self):
     return "relay weight object for %s" % \
