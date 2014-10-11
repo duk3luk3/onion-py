@@ -123,10 +123,10 @@ class RelayDetails:
     self.host_name = g('host_name')
     self.last_restarted = g('last_restarted')
     self.bandwidth = (g('bandwidth_rate'),g('bandwidth_burst'), \
-      g('bandwidth_observed'),g('bandwidth_advertised'))
+      g('observed_bandwidth'),g('advertised_bandwidth'))
     self.exit_policy = g('exit_policy')
-    self.exit_policy_summary = g('exit_summary_policy')
-    self.exit_policy_v6_summary = g('exit_policy_v6_policy')
+    self.exit_policy_summary = g('exit_policy_summary')
+    self.exit_policy_v6_summary = g('exit_policy_v6_summary')
     self.contact = g('contact')
     self.platform = g('platform')
     self.recommended_version = g('recommended_version')
@@ -222,7 +222,7 @@ class BridgeDetails:
     g = document.get
     self.nickname = g('nickname')
     self.hashed_fingerprint = g('hashed_fingerprint')
-    self.or_address = g('or_address')
+    self.or_addresses = g('or_addresses')
     self.last_seen = g('last_seen')
     self.first_seen = g('first_seen')
     self.running = g('running')
@@ -339,6 +339,8 @@ The relay weight object contains:
   - guard_probability
   - middle_probability
   - exit_probability
+  - advertised_bandwidth
+  - consensus_weight
 """
 class RelayWeight:
   def __init__(self, document):
@@ -359,6 +361,12 @@ class RelayWeight:
     self.exit_probability = dict([(k, GraphHistory(v)) for k,v in
       g('exit_probability').items()]) if \
         g('exit_probability') is not None else None
+    self.advertised_bandwidth = dict([(k, GraphHistory(v)) for k,v in
+      g('advertised_bandwidth').items()]) if \
+        g('advertised_bandwidth') is not None else None
+    self.consensus_weight = dict([(k, GraphHistory(v)) for k,v in
+      g('consensus_weight').items()]) if \
+        g('consensus_weight') is not None else None
 
   def __str__(self):
     return "relay weight object for %s" % \
@@ -448,6 +456,25 @@ class RelayUptime:
 
   def __str__(self):
     return "Relay uptime history object for %s" % \
+      (self.fingerprint or '<no fingerprint>')
+
+
+"""
+Bridge Uptime object
+
+The bridge uptime object contains:
+  - fingerprint
+  - uptime
+"""
+class BridgeUptime:
+  def __init__(self, document):
+    g = document.get
+    self.fingerprint = g('fingerprint')
+    self.uptime = dict([(k, GraphHistory(v)) for k,v in g('uptime').items()]) \
+      if g('uptime') is not None else None
+
+  def __str__(self):
+    return "Bridge uptime history object for %s" % \
       (self.fingerprint or '<no fingerprint>')
 
 
