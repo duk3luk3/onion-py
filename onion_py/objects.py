@@ -496,7 +496,7 @@ class Uptime:
     self.bridges_published = g('bridges_published')
     self.relays = [RelayUptime(d) for d in g('relays')] if \
         g('relays') is not None else None
-    self.bridges = [RelayUptime(d) for d in g('bridges')] if \
+    self.bridges = [BridgeUptime(d) for d in g('bridges')] if \
         g('bridges') is not None else None
 
   def __str__(self):
