@@ -46,6 +46,14 @@ class DataError(OnionPyError):
     def __str__(self):
         return self.msg
 
+class MajorVersionMismatchError(OnionPyError):
+    """ Raised when OnionOO response major version is higher than supported major version """
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
 class BadRequestError(OnionPyError):
   pass
 
@@ -58,7 +66,8 @@ The main OnionOO api wrapper class.
 class Manager:
   OOO_URL = 'https://onionoo.torproject.org/'
   OOO_SLUG = 'ONIONOO'
-  OOO_VERSION = '0.0.0'
+  OOO_VERSION_MAJOR = 2
+  OOO_VERSION_MINOR = 3
 
   OOO_QUERIES = {
       'summary':    o.Summary,
@@ -151,6 +160,11 @@ class Manager:
         raise ServiceUnavailableError('OnionPy is down: {}'.format(r.reason))
 
     if result is not None:
-      return self.OOO_QUERIES[query](result)
+      document = self.OOO_QUERIES[query](result)
+
+      versions = document.version.split('.')
+      if int(versions[0]) > self.OOO_VERSION_MAJOR:
+        raise MajorVersionMismatchError("Received OnionOO Document with version {}, this library only supports up to version {}".format(versions[0],self.OOO_VERSION_MAJOR))
+      return document
     else:
       return None

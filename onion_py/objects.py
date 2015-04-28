@@ -49,6 +49,8 @@ Summary document
 https://onionoo.torproject.org/#summary
 
 The summary document contains:
+  - version: Onionoo protocol version string
+  - next_major_version_scheduled: UTC date (YY-MM-DD) when the next major protocol version is scheduled to be deployed (optional)
   - relays_published: timestamp of relay publication
   - relays: relay summaries
   - bridges_published: timestamp of bridge publication
@@ -57,6 +59,8 @@ The summary document contains:
 """
 class Summary:
   def __init__(self, document):
+    self.version = document.get('version')
+    self.next_major_version_scheduled = document.get('next_major_version_scheduled')
     self.relays_published = document.get('relays_published')
     self.bridges_published = document.get('bridges_published')
     self.relays = [RelaySummary(d) for d in document.get('relays')]
@@ -95,7 +99,6 @@ The relay detail contains:
   - platform
   - recommended_version
   - family
-  - advertised_bandwidth_fraction
   - consensus_weight_fraction
   - guard_probability
   - middle_probability
@@ -131,7 +134,6 @@ class RelayDetails:
     self.platform = g('platform')
     self.recommended_version = g('recommended_version')
     self.family = g('family')
-    self.advertised_bandwidth_fraction = g('advertised_bandwidth_fraction')
     self.consensus_weight_fraction = g('consensus_weight_fraction')
     self.guard_probability = g('guard_probability')
     self.middle_probability = g('middle_probability')
@@ -215,7 +217,7 @@ The bridge detail contains:
   - last_restarted
   - advertised_bandwidth
   - platform
-  - pool_assignment
+  - transports
 """
 class BridgeDetails:
   def __init__(self, document):
@@ -230,7 +232,7 @@ class BridgeDetails:
     self.last_restarted = g('last_restarted')
     self.advertised_bandwidth = g('advertised_bandwidth')
     self.platform = g('platform')
-    self.pool_assignment = g('pool_assignment')
+    self.transports = g('transports')
 
   def __str__(self):
     return "Detailed bridge descriptor for %s (%s)" % \
@@ -244,6 +246,8 @@ Details document
 https://onionoo.torproject.org/#details
 
 The details document contains:
+  - version: Onionoo protocol version string
+  - next_major_version_scheduled: UTC date (YY-MM-DD) when the next major protocol version is scheduled to be deployed (optional)
   - relays_published: timestamp of relay publication
   - relays: relay details
   - bridges_published: timestamp of bridge publication
@@ -251,6 +255,8 @@ The details document contains:
 """
 class Details:
   def __init__(self, document):
+    self.version = document.get('version')
+    self.next_major_version_scheduled = document.get('next_major_version_scheduled')
     self.relays_published = document.get('relays_published')
     self.bridges_published = document.get('bridges_published')
     self.relays = [RelayDetails(d) for d in document.get('relays')]
@@ -312,6 +318,8 @@ Bandwidth document
 https://onionoo.torproject.org/#bandwidth
 
 The bandwidth document contains:
+  - version: Onionoo protocol version string
+  - next_major_version_scheduled: UTC date (YY-MM-DD) when the next major protocol version is scheduled to be deployed (optional)
   - relays_published
   - relays
   - bridges_published
@@ -320,6 +328,8 @@ The bandwidth document contains:
 class Bandwidth:
   def __init__(self,document):
     g = document.get
+    self.version = g('version')
+    self.next_major_version_scheduled = g('next_major_version_scheduled')
     self.relays_published = g('relays_published')
     self.bridges_published = g('bridges_published')
     self.relays = [BandwidthDetail(d) for d in g('relays')]
@@ -334,21 +344,16 @@ Relay weight object
 
 The relay weight object contains:
   - fingerprint
-  - advertised_bandwidth_fraction
   - consensus_weight_fraction
   - guard_probability
   - middle_probability
   - exit_probability
-  - advertised_bandwidth
   - consensus_weight
 """
 class RelayWeight:
   def __init__(self, document):
     g = document.get
     self.fingerprint = g('fingerprint')
-    self.advertised_bandwidth_fraction = dict([(k, GraphHistory(v)) for k,v in
-      g('advertised_bandwidth_fraction').items()]) if \
-        g('advertised_bandwidth_fraction') is not None else None
     self.consensus_weight_fraction = dict([(k, GraphHistory(v)) for k,v in
       g('consensus_weight_fraction').items()]) if \
           g('consensus_weight_fraction') is not None else None
@@ -361,9 +366,6 @@ class RelayWeight:
     self.exit_probability = dict([(k, GraphHistory(v)) for k,v in
       g('exit_probability').items()]) if \
         g('exit_probability') is not None else None
-    self.advertised_bandwidth = dict([(k, GraphHistory(v)) for k,v in
-      g('advertised_bandwidth').items()]) if \
-        g('advertised_bandwidth') is not None else None
     self.consensus_weight = dict([(k, GraphHistory(v)) for k,v in
       g('consensus_weight').items()]) if \
         g('consensus_weight') is not None else None
@@ -378,6 +380,8 @@ Weights document
 https://onionoo.torproject.org/#weights
 
 The weights document contains:
+  - version: Onionoo protocol version string
+  - next_major_version_scheduled: UTC date (YY-MM-DD) when the next major protocol version is scheduled to be deployed (optional)
   - relays_published
   - relays
   - bridges_published
@@ -386,6 +390,8 @@ The weights document contains:
 class Weights:
   def __init__(self,document):
     g = document.get
+    self.version = g('version')
+    self.next_major_version_scheduled = g('next_major_version_scheduled')
     self.relays_published = g('relays_published')
     self.bridges_published = g('bridges_published')
     self.relays = [RelayWeight(d) for d in g('relays')] if \
@@ -422,6 +428,8 @@ Clients document
 https://onionoo.torproject.org/#clients
 
 The clients document contains:
+  - version: Onionoo protocol version string
+  - next_major_version_scheduled: UTC date (YY-MM-DD) when the next major protocol version is scheduled to be deployed (optional)
   - relays_published
   - relays
   - bridges_published
@@ -430,6 +438,8 @@ The clients document contains:
 class Clients:
   def __init__(self, document):
     g = document.get
+    self.version = g('version')
+    self.next_major_version_scheduled = g('next_major_version_scheduled')
     self.relays_published = g('relays_published')
     self.bridges_published = g('bridges_published')
     self.relays = []
@@ -446,6 +456,7 @@ Relay Uptime object
 The relay uptime object contains:
   - fingerprint
   - uptime
+  - flags
 """
 class RelayUptime:
   def __init__(self, document):
@@ -453,6 +464,8 @@ class RelayUptime:
     self.fingerprint = g('fingerprint')
     self.uptime = dict([(k, GraphHistory(v)) for k,v in g('uptime').items()]) \
       if g('uptime') is not None else None
+    #TODO: Parse fully
+    self.flags = g('flags')
 
   def __str__(self):
     return "Relay uptime history object for %s" % \
@@ -484,6 +497,8 @@ Uptime document
 https://onionoo.torproject.org/#uptime
 
 The uptime document contains:
+  - version: Onionoo protocol version string
+  - next_major_version_scheduled: UTC date (YY-MM-DD) when the next major protocol version is scheduled to be deployed (optional)
   - relays_published
   - relays
   - bridges_published
@@ -492,6 +507,8 @@ The uptime document contains:
 class Uptime:
   def __init__(self, document):
     g = document.get
+    self.version = g('version')
+    self.next_major_version_scheduled = g('next_major_version_scheduled')
     self.relays_published = g('relays_published')
     self.bridges_published = g('bridges_published')
     self.relays = [RelayUptime(d) for d in g('relays')] if \
