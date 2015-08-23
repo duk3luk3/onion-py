@@ -7,6 +7,9 @@ import json
 import abc
 
 
+class DependencyError(Exception):
+  pass
+
 """
 OnionCache class
 
@@ -59,8 +62,11 @@ class OnionSimpleCache(OnionCache):
 
 class OnionMemcached(OnionCache):
   def __init__(self, host=('localhost', 11211)):
+    try:
       from pymemcache.client import Client
       self.memcached_client = Client(host, serializer=json_serializer, deserializer=json_deserializer)
+    except ImportError:
+      raise DependencyError("Error importing pymemcache library for OnionMemcached")
 
   def get(self, query, params):
     return self.memcached_client.get(key_serializer(query,params))
@@ -68,8 +74,16 @@ class OnionMemcached(OnionCache):
   def set(self, query, params, document):
     return self.memcached_client.set(key_serializer(query,params),document)
 
+class OnionDjangoCache(OnionCache):
+  def __init__(self):
+    try:
+      from django.core.cache import cache
+      self.cache = cache
+    except ImportError:
+      raise DependencyError("Error importing django cache library for OnionDjangoCache")
 
+  def get(self, query, params):
+    return self.cache.get(key_serializer(query, params))
 
-
-
-
+  def set(self, query, params, document):
+    return self.cache.set(key_serializer(query, params), document)

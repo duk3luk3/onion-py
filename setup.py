@@ -16,7 +16,8 @@ setup(
     install_requires = ['requests>=2.0.0'],
 
     extras_require = {
-      'Query caching': ['pymemcache>=1.2.1','six']
+      'Results caching with memcached': ['pymemcache>=1.2.1','six'],
+      'Results caching with django-cache': ['django']
       },
     dependency_links = [
       'git+https://github.com/pinterest/pymemcache.git'
