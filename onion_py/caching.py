@@ -4,24 +4,29 @@ Onion-Py caching backends
 
 from onion_py.manager import Manager
 import json
+import abc
 
-class NotImplementedError(Exception):
-  pass
 
 """
 OnionCache class
 
 Abstract base class showing the prototype for OnionOO Cache
 """
-class OnionCache:
+class OnionCache(object):
+
+  __metaclass__ = abc.ABCMeta
+
+  @abc.abstractmethod
   def __init__(self, **kwargs):
-    raise NotImplementedError("Don't instantiate this abstract base class.")
-
+      pass
+  
+  @abc.abstractmethod
   def get(self, query, params):
-    raise NotImplementedError("You should never see this.")
+      pass
 
+  @abc.abstractmethod
   def set(self, query, params, document):
-    raise NotImplementedError("You should never see this.")
+      pass
 
 def json_serializer(key, value):
   if type(value) == str:
