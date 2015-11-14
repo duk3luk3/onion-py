@@ -102,7 +102,7 @@ def test(m,n):
     d = m.query('details', limit=1, offset=num)
     print("Details for one relay: >>%s<<" % (d.relays[0],))
     d = m.query('bandwidth', limit=1, offset=num)
-    if len(d.relays) > 0:
+    if len(d.relays) > 0 and d.relays[0].write_history is not None:
       d = d.relays[0].write_history.get('3_days')
     else:
       d = None
