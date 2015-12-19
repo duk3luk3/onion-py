@@ -66,8 +66,8 @@ The main OnionOO api wrapper class.
 class Manager:
   OOO_URL = 'https://onionoo.torproject.org/'
   OOO_SLUG = 'ONIONOO'
-  OOO_VERSION_MAJOR = 2
-  OOO_VERSION_MINOR = 3
+  OOO_VERSION_MAJOR = 3
+  OOO_VERSION_MINOR = 0
 
   OOO_QUERIES = {
       'summary':    o.Summary,
