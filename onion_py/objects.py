@@ -164,7 +164,7 @@ class RelayDetails:
 
     if 'accept' in self.exit_policy_summary:
       return in_ports(self.exit_policy_summary['accept'])
-    elif 'reject' in self.exit_policy_summar:
+    elif 'reject' in self.exit_policy_summary:
       return not in_ports(self.exit_policy_summary['reject'])
     return False
 
