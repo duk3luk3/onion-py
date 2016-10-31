@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name="OnionPy",
-    version="0.3.2",
+    version="0.3.3",
     description="Python wrapper for the OnionOO tor status API",
     long_description=open('README.txt').read(),
     author="Lukas Erlacher",
