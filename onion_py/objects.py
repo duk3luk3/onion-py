@@ -98,7 +98,7 @@ The relay detail contains:
   - contact
   - platform
   - recommended_version
-  - family
+  - effective_family
   - consensus_weight_fraction
   - guard_probability
   - middle_probability
@@ -133,7 +133,7 @@ class RelayDetails:
     self.contact = g('contact')
     self.platform = g('platform')
     self.recommended_version = g('recommended_version')
-    self.family = g('family')
+    self.effective_family = g('effective_family')
     self.consensus_weight_fraction = g('consensus_weight_fraction')
     self.guard_probability = g('guard_probability')
     self.middle_probability = g('middle_probability')
